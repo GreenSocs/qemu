@@ -17,9 +17,11 @@
 #include "exec/address-spaces.h"
 #include "hw/core/cpu.h"
 #include "hw/sysbus.h"
+#include "qapi/visitor.h"
 
 struct NoneMachineState {
     MachineState parent;
+    uint64_t ram_addr;
 };
 
 #define TYPE_NONE_MACHINE MACHINE_TYPE_NAME("none")
@@ -27,6 +29,7 @@ OBJECT_DECLARE_SIMPLE_TYPE(NoneMachineState, NONE_MACHINE)
 
 static void machine_none_init(MachineState *mch)
 {
+    NoneMachineState *nms = NONE_MACHINE(mch);
     CPUState *cpu = NULL;
 
     /* Initialize CPU (if user asked for it) */
@@ -38,9 +41,13 @@ static void machine_none_init(MachineState *mch)
         }
     }
 
-    /* RAM at address zero */
+    /* RAM at configured address (default: 0) */
     if (mch->ram) {
-        memory_region_add_subregion(get_system_memory(), 0, mch->ram);
+        memory_region_add_subregion(get_system_memory(), nms->ram_addr,
+                                    mch->ram);
+    } else if (nms->ram_addr) {
+        error_report("'ram-addr' has been specified but the machine has no ram");
+        exit(1);
     }
 
     if (mch->kernel_filename) {
@@ -48,6 +55,15 @@ static void machine_none_init(MachineState *mch)
                      "(use the generic 'loader' device instead).");
         exit(1);
     }
+}
+
+static void machine_none_visit_ram_addr(Object *obj, Visitor *v,
+                                        const char *name, void *opaque,
+                                        Error **errp)
+{
+    NoneMachineState *nms = NONE_MACHINE(obj);
+
+    visit_type_uint64(v, name, &nms->ram_addr, errp);
 }
 
 static void machine_none_class_init(ObjectClass *oc, void *data)
@@ -63,6 +79,13 @@ static void machine_none_class_init(ObjectClass *oc, void *data)
     mc->no_parallel = 1;
     mc->no_floppy = 1;
     mc->no_cdrom = 1;
+
+    object_class_property_add(oc, "ram-addr", "int",
+        machine_none_visit_ram_addr,
+        machine_none_visit_ram_addr,
+        NULL, NULL);
+    object_class_property_set_description(oc, "ram-addr",
+        "Base address of the RAM (default is 0)");
     mc->no_sdcard = 1;
 
     /* allow cold plugging any any "user-creatable" sysbus device */
