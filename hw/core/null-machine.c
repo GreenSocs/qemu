@@ -18,6 +18,13 @@
 #include "hw/core/cpu.h"
 #include "hw/sysbus.h"
 
+struct NoneMachineState {
+    MachineState parent;
+};
+
+#define TYPE_NONE_MACHINE MACHINE_TYPE_NAME("none")
+OBJECT_DECLARE_SIMPLE_TYPE(NoneMachineState, NONE_MACHINE)
+
 static void machine_none_init(MachineState *mch)
 {
     CPUState *cpu = NULL;
@@ -43,8 +50,10 @@ static void machine_none_init(MachineState *mch)
     }
 }
 
-static void machine_none_machine_init(MachineClass *mc)
+static void machine_none_class_init(ObjectClass *oc, void *data)
 {
+    MachineClass *mc = MACHINE_CLASS(oc);
+
     mc->desc = "empty machine";
     mc->init = machine_none_init;
     mc->max_cpus = 1;
@@ -60,4 +69,15 @@ static void machine_none_machine_init(MachineClass *mc)
     machine_class_allow_dynamic_device(mc, TYPE_SYS_BUS_DEVICE);
 }
 
-DEFINE_MACHINE("none", machine_none_machine_init)
+static const TypeInfo none_machine_info = {
+    .name          = TYPE_NONE_MACHINE,
+    .parent        = TYPE_MACHINE,
+    .instance_size = sizeof(NoneMachineState),
+    .class_init    = machine_none_class_init,
+};
+
+static void none_machine_register_types(void)
+{
+    type_register_static(&none_machine_info);
+}
+type_init(none_machine_register_types);
