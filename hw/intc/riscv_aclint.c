@@ -344,6 +344,7 @@ static void riscv_aclint_mtimer_class_init(ObjectClass *klass, void *data)
     DeviceClass *dc = DEVICE_CLASS(klass);
     dc->realize = riscv_aclint_mtimer_realize;
     device_class_set_props(dc, riscv_aclint_mtimer_properties);
+    dc->user_creatable = true;
     ResettableClass *rc = RESETTABLE_CLASS(klass);
     rc->phases.enter = riscv_aclint_mtimer_reset_enter;
 }
@@ -550,6 +551,7 @@ static void riscv_aclint_swi_class_init(ObjectClass *klass, void *data)
     device_class_set_props(dc, riscv_aclint_swi_properties);
     ResettableClass *rc = RESETTABLE_CLASS(klass);
     rc->phases.enter = riscv_aclint_swi_reset_enter;
+    dc->user_creatable = true;
 }
 
 static const TypeInfo riscv_aclint_swi_info = {
