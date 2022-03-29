@@ -27,13 +27,6 @@
 #include "hw/riscv/riscv_hart.h"
 #include "hw/cpu/cpus.h"
 
-void riscv_hart_array_realize(RISCVHartArrayState *state, Error **errp)
-{
-    /* disable the clustering */
-    cpus_disable_clustering(CPUS(state));
-    qdev_realize(DEVICE(state), NULL, errp);
-}
-
 static Property riscv_harts_props[] = {
     DEFINE_PROP_UINT32("hartid-base", RISCVHartArrayState, hartid_base, 0),
     DEFINE_PROP_UINT64("resetvec", RISCVHartArrayState, resetvec,
@@ -52,19 +45,6 @@ static void riscv_harts_configure_cpu(CpusState *base, CPUState *cpu,
     cpuenv->mhartid = s->hartid_base + i;
 }
 
-static void riscv_harts_init(Object *obj)
-{
-    /* add a temporary property to keep num-harts */
-    object_property_add_alias(obj, "num-harts", obj, "num-cpus");
-}
-
-static void riscv_harts_finalize(Object *obj)
-{
-    RISCVHartArrayState *s = RISCV_HART_ARRAY(obj);
-
-    g_free(s->harts);
-}
-
 static void riscv_harts_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -81,9 +61,7 @@ static const TypeInfo riscv_harts_info = {
     .name          = TYPE_RISCV_HART_ARRAY,
     .parent        = TYPE_CPUS,
     .instance_size = sizeof(RISCVHartArrayState),
-    .instance_init = riscv_harts_init,
     .class_init    = riscv_harts_class_init,
-    .instance_finalize = riscv_harts_finalize,
 };
 
 static void riscv_harts_register_types(void)
