@@ -57,7 +57,7 @@ static void machine_none_machine_init(MachineClass *mc)
     mc->no_sdcard = 1;
 
     /* allow cold plugging any any "user-creatable" sysbus device */
-    machine_class_allow_dynamic_sysbus_dev(mc, TYPE_SYS_BUS_DEVICE);
+    machine_class_allow_dynamic_device(mc, TYPE_SYS_BUS_DEVICE);
 }
 
 DEFINE_MACHINE("none", machine_none_machine_init)
