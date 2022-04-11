@@ -18,6 +18,7 @@
 #include "hw/core/cpu.h"
 #include "hw/sysbus.h"
 #include "qapi/visitor.h"
+#include "hw/cpu/cpus.h"
 
 struct NoneMachineState {
     MachineState parent;
@@ -92,8 +93,9 @@ static void machine_none_class_init(ObjectClass *oc, void *data)
         "Base address of the RAM (default is 0)");
     mc->no_sdcard = 1;
 
-    /* allow cold plugging any any "user-creatable" sysbus device */
+    /* allow cold plugging any any "user-creatable" sysbus device and cpus */
     machine_class_allow_dynamic_device(mc, TYPE_SYS_BUS_DEVICE);
+    machine_class_allow_dynamic_device(mc, TYPE_CPUS);
 }
 
 static const TypeInfo none_machine_info = {
