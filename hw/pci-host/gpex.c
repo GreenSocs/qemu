@@ -36,6 +36,7 @@
 #include "hw/qdev-properties.h"
 #include "migration/vmstate.h"
 #include "qemu/module.h"
+#include "qapi/visitor.h"
 
 /****************************************************************************
  * GPEX host
@@ -157,6 +158,17 @@ static Property gpex_host_properties[] = {
     DEFINE_PROP_END_OF_LIST(),
 };
 
+static void machine_none_visit_irq_num(Object *obj, Visitor *v,
+                                       const char *name, void *opaque,
+                                       Error **errp)
+{
+    GPEXHost *s = GPEX_HOST(obj);
+    uintptr_t idx = (uintptr_t) opaque;
+    assert(idx < 4);
+
+    visit_type_int32(v, name, &s->irq_num[idx], errp);
+}
+
 static void gpex_host_class_init(ObjectClass *klass, void *data)
 {
     DeviceClass *dc = DEVICE_CLASS(klass);
@@ -167,6 +179,22 @@ static void gpex_host_class_init(ObjectClass *klass, void *data)
     set_bit(DEVICE_CATEGORY_BRIDGE, dc->categories);
     dc->fw_name = "pci";
     device_class_set_props(dc, gpex_host_properties);
+    object_class_property_add(klass, "irq-num[0]", "int",
+        machine_none_visit_irq_num,
+        machine_none_visit_irq_num,
+        NULL, (void *) 0);
+    object_class_property_add(klass, "irq-num[1]", "int",
+        machine_none_visit_irq_num,
+        machine_none_visit_irq_num,
+        NULL, (void *) 1);
+    object_class_property_add(klass, "irq-num[2]", "int",
+        machine_none_visit_irq_num,
+        machine_none_visit_irq_num,
+        NULL, (void *) 2);
+    object_class_property_add(klass, "irq-num[3]", "int",
+        machine_none_visit_irq_num,
+        machine_none_visit_irq_num,
+        NULL, (void *) 3);
 }
 
 static void gpex_host_initfn(Object *obj)
