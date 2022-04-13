@@ -25,10 +25,12 @@
 #include "qemu/osdep.h"
 #include "hw/irq.h"
 #include "hw/sysbus.h"
+#include "hw/qdev-properties.h"
 #include "migration/vmstate.h"
 #include "qemu/module.h"
 #include "qemu/timer.h"
 #include "qom/object.h"
+#include "sysemu/runstate.h"
 
 #define TYPE_GPIOKEY "gpio-key"
 OBJECT_DECLARE_SIMPLE_TYPE(GPIOKEYState, GPIOKEY)
@@ -39,6 +41,14 @@ struct GPIOKEYState {
 
     QEMUTimer *timer;
     qemu_irq irq;
+    bool register_powerdown_notifier;
+    Notifier powerdown_notifier;
+};
+
+static Property gpio_key_properties[] = {
+    DEFINE_PROP_BOOL("register-powerdown-notifier", GPIOKEYState,
+                     register_powerdown_notifier, false),
+    DEFINE_PROP_END_OF_LIST(),
 };
 
 static const VMStateDescription vmstate_gpio_key = {
@@ -75,6 +85,13 @@ static void gpio_key_set_irq(void *opaque, int irq, int level)
               qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + GPIO_KEY_LATENCY);
 }
 
+static void gpio_key_notify(Notifier *n, void *opaque)
+{
+    GPIOKEYState *s = container_of(n, GPIOKEYState, powerdown_notifier);
+
+    gpio_key_set_irq(s, 0, 1);
+}
+
 static void gpio_key_realize(DeviceState *dev, Error **errp)
 {
     GPIOKEYState *s = GPIOKEY(dev);
@@ -83,6 +100,11 @@ static void gpio_key_realize(DeviceState *dev, Error **errp)
     sysbus_init_irq(sbd, &s->irq);
     qdev_init_gpio_in(dev, gpio_key_set_irq, 1);
     s->timer = timer_new_ms(QEMU_CLOCK_VIRTUAL, gpio_key_timer_expired, s);
+
+    if (s->register_powerdown_notifier) {
+        s->powerdown_notifier.notify = gpio_key_notify;
+        qemu_register_powerdown_notifier(&s->powerdown_notifier);
+    }
 }
 
 static void gpio_key_class_init(ObjectClass *klass, void *data)
@@ -92,6 +114,7 @@ static void gpio_key_class_init(ObjectClass *klass, void *data)
     dc->realize = gpio_key_realize;
     dc->vmsd = &vmstate_gpio_key;
     dc->reset = &gpio_key_reset;
+    device_class_set_props(dc, gpio_key_properties);
 }
 
 static const TypeInfo gpio_key_info = {
