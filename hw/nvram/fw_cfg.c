@@ -1126,6 +1126,7 @@ static void fw_cfg_common_realize(DeviceState *dev, Error **errp)
 
     if (s->dma_enabled) {
         version |= FW_CFG_VERSION_DMA;
+        s->dma_as = &address_space_memory;
     }
 
     fw_cfg_add_i32(s, FW_CFG_ID, version);
