@@ -159,14 +159,28 @@ void qmp_sysbus_mmio_map(const char *device,
                          bool has_mmio, uint8_t mmio,
                          uint64_t addr,
                          bool has_priority, int32_t priority,
+                         bool has_alias, bool alias,
+                         bool has_offset, uint64_t offset,
+                         bool has_size, uint64_t size,
                          Error **errp)
 {
     Object *obj = object_resolve_path_type(device, TYPE_SYS_BUS_DEVICE, NULL);
     SysBusDevice *dev;
+    MemoryRegion *mr;
 
     if (phase_get() != PHASE_MACHINE_INITIALIZED) {
         error_setg(errp, "The command is permitted only when "
                          "the machine is in initialized phase");
+        return;
+    }
+
+    if (has_offset && !has_alias) {
+        error_setg(errp, "offset is only permitted when alias is set");
+        return;
+    }
+
+    if (has_size && !has_alias) {
+        error_setg(errp, "size is only permitted when alias is set");
         return;
     }
 
@@ -179,8 +193,21 @@ void qmp_sysbus_mmio_map(const char *device,
     if (!has_mmio) {
         mmio = 0;
     }
+
     if (!has_priority) {
         priority = 0;
+    }
+
+    if (!has_alias) {
+        alias = false;
+    }
+
+    if (!has_offset) {
+        offset = 0;
+    }
+
+    if (!has_size) {
+        size = 0;
     }
 
     if (mmio >= dev->num_mmio) {
@@ -189,14 +216,20 @@ void qmp_sysbus_mmio_map(const char *device,
         return;
     }
 
-    if (dev->mmio[mmio].addr != (hwaddr)-1) {
-        error_setg(errp, "MMIO index '%u' is already mapped", mmio);
-        return;
+    if (alias) {
+        mr = g_new0(MemoryRegion, 1);
+        memory_region_init_alias(mr, NULL, "sysbus-mmio-alias",
+                                 dev->mmio[mmio].memory, offset, size);
+    } else {
+        mr = dev->mmio[mmio].memory;
+        if (dev->mmio[mmio].addr != (hwaddr)-1) {
+            error_setg(errp, "MMIO index '%u' is already mapped", mmio);
+            return;
+        }
     }
 
     if (!memory_region_try_add_subregion(get_system_memory(), addr,
-                                         dev->mmio[mmio].memory, priority,
-                                         errp)) {
+                                         mr, priority, errp)) {
         return;
     }
 
