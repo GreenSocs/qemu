@@ -764,6 +764,7 @@ static void virtio_mmio_class_init(ObjectClass *klass, void *data)
     dc->reset = virtio_mmio_reset;
     set_bit(DEVICE_CATEGORY_MISC, dc->categories);
     device_class_set_props(dc, virtio_mmio_properties);
+    dc->user_creatable = true;
 }
 
 static const TypeInfo virtio_mmio_info = {

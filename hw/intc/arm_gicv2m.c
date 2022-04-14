@@ -182,6 +182,7 @@ static void gicv2m_class_init(ObjectClass *klass, void *data)
 
     device_class_set_props(dc, gicv2m_properties);
     dc->realize = gicv2m_realize;
+    dc->user_creatable = true;
 }
 
 static const TypeInfo gicv2m_info = {

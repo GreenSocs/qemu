@@ -115,6 +115,7 @@ static void gpio_key_class_init(ObjectClass *klass, void *data)
     dc->vmsd = &vmstate_gpio_key;
     dc->reset = &gpio_key_reset;
     device_class_set_props(dc, gpio_key_properties);
+    dc->user_creatable = true;
 }
 
 static const TypeInfo gpio_key_info = {

@@ -195,6 +195,7 @@ static void gpex_host_class_init(ObjectClass *klass, void *data)
         machine_none_visit_irq_num,
         machine_none_visit_irq_num,
         NULL, (void *) 3);
+    dc->user_creatable = true;
 }
 
 static void gpex_host_initfn(Object *obj)

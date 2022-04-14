@@ -578,6 +578,7 @@ static void pl061_class_init(ObjectClass *klass, void *data)
     device_class_set_props(dc, pl061_props);
     rc->phases.enter = pl061_enter_reset;
     rc->phases.hold = pl061_hold_reset;
+    dc->user_creatable = true;
 }
 
 static const TypeInfo pl061_info = {

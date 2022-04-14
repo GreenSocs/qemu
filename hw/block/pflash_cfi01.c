@@ -936,6 +936,7 @@ static void pflash_cfi01_class_init(ObjectClass *klass, void *data)
     device_class_set_props(dc, pflash_cfi01_properties);
     dc->vmsd = &vmstate_pflash;
     set_bit(DEVICE_CATEGORY_STORAGE, dc->categories);
+    dc->user_creatable = true;
 }
 
 

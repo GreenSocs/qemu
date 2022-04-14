@@ -338,6 +338,7 @@ static void pl031_class_init(ObjectClass *klass, void *data)
 
     dc->vmsd = &vmstate_pl031;
     device_class_set_props(dc, pl031_properties);
+    dc->user_creatable = true;
 }
 
 static const TypeInfo pl031_info = {

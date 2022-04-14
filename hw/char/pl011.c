@@ -419,6 +419,7 @@ static void pl011_class_init(ObjectClass *oc, void *data)
     dc->realize = pl011_realize;
     dc->vmsd = &vmstate_pl011;
     device_class_set_props(dc, pl011_properties);
+    dc->user_creatable = true;
 }
 
 static const TypeInfo pl011_arm_info = {

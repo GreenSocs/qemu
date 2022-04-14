@@ -1367,6 +1367,7 @@ static void fw_cfg_mem_class_init(ObjectClass *klass, void *data)
 
     dc->realize = fw_cfg_mem_realize;
     device_class_set_props(dc, fw_cfg_mem_properties);
+    dc->user_creatable = true;
 }
 
 static const TypeInfo fw_cfg_mem_info = {

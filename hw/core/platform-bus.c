@@ -213,6 +213,7 @@ static void platform_bus_class_init(ObjectClass *klass, void *data)
 
     dc->realize = platform_bus_realize;
     device_class_set_props(dc, platform_bus_properties);
+    dc->user_creatable = true;
 }
 
 static const TypeInfo platform_bus_info = {
