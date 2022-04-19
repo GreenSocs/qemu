@@ -23,6 +23,7 @@ OBJECT_DECLARE_SIMPLE_TYPE(ArmCpusState, ARM_CPUS)
  * @has_el3: use to initialize cpu's has_el3
  * @has_el2: use to initialize cpu's has_el2
  * @reset_cbar: use to initialize cpu's reset-cbar
+ * @psci_conduit: use to initialize cpu's psci-conduit
  */
 struct ArmCpusState {
     CpusState parent_obj;
@@ -31,6 +32,7 @@ struct ArmCpusState {
     bool has_el3;
     bool has_el2;
     uint64_t reset_cbar;
+    uint32_t psci_conduit;
 };
 
 /*

@@ -21,6 +21,7 @@ static Property arm_cpus_props[] = {
     DEFINE_PROP_BOOL("has_el3", ArmCpusState, has_el3, false),
     DEFINE_PROP_BOOL("has_el2", ArmCpusState, has_el2, false),
     DEFINE_PROP_UINT64("reset-cbar", ArmCpusState, reset_cbar, 0),
+    DEFINE_PROP_UINT32("psci-conduit", ArmCpusState, psci_conduit, 0),
     DEFINE_PROP_END_OF_LIST()
 };
 
@@ -35,6 +36,7 @@ static void arm_cpus_configure_cpu(CpusState *base, CPUState *cpu,
     qdev_prop_set_bit(cpudev, "has_el3", s->has_el3);
     qdev_prop_set_bit(cpudev, "has_el2", s->has_el2);
     qdev_prop_set_uint64(cpudev, "reset-cbar", s->reset_cbar);
+    qdev_prop_set_uint32(cpudev, "psci-conduit", s->psci_conduit);
 }
 
 static void arm_cpus_class_init(ObjectClass *klass, void *data)
